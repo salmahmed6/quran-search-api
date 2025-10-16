@@ -4,13 +4,12 @@ A simple and fast API to search Arabic words in the Quran JSON and return occurr
 
 ## Features
 
-- 🔍 Fast Arabic word search in Quran
-- 📊 Results ordered by surah and ayah number
-- 🔄 Batch search for multiple words
-- 📈 Health monitoring endpoint
-- 🚀 Pre-built index for faster searches
-- 🛡️ Input validation and error handling
-- 📚 Comprehensive API documentation
+- Fast Arabic word search in Quran
+- Results ordered by surah and ayah number
+- Pre-built index for faster searches
+- Input validation and error handling
+- Arabic text normalization
+- Word variation support (with/without ال prefix)
 
 ## Quick Start
 
@@ -46,7 +45,7 @@ The API will be available at `http://localhost:3000`
 
 ## API Endpoints
 
-### Search Single Word
+### Search Arabic Word
 **GET** `/api/search?word=<arabic_word>`
 
 Search for a single Arabic word in the Quran.
@@ -63,8 +62,8 @@ curl "http://localhost:3000/api/search?word=الله"
   "data": {
     "word": "الله",
     "normalized_word": "الله",
-    "total_count": 2699,
-    "occurrences_count": 2699,
+    "total_count": 2313,
+    "occurrences_count": 1716,
     "occurrences": [
       {
         "surah_number": 1,
@@ -74,9 +73,26 @@ curl "http://localhost:3000/api/search?word=الله"
         "count_in_ayah": 1
       }
     ]
+  },
+  "meta": {
+    "timestamp": "2025-10-16T12:31:33.143Z",
+    "query": "الله",
+    "resultsCount": 1716,
+    "totalOccurrences": 2313
   }
 }
 ```
+
+### Response Fields Explanation
+
+- `word`: The original search term
+- `normalized_word`: The normalized version after Arabic text processing
+- `total_count`: Total number of word occurrences across all verses
+- `occurrences_count`: Number of unique verses containing the word
+- `occurrences`: Array of verses containing the word, ordered by surah and ayah
+- `count_in_ayah`: Number of times the word appears in that specific verse
+
+**Note**: `total_count` and `occurrences_count` may differ when a word appears multiple times in the same verse.
 
 ## Testing the API
 
@@ -138,7 +154,6 @@ quran-search-api/
 │   └── index.js              # Main application entry point
 ├── data/
 │   ├── quran.json           # Quran text data
-│   ├── index.json           # Pre-built search index (generated)
 │   └── index.js             # Index builder script
 ├── package.json
 └── README.md
@@ -146,47 +161,48 @@ quran-search-api/
 
 ## Configuration
 
-Environment variables can be set in a `.env` file:
+Create a `.env` file in the root directory with the following variables:
 
 ```env
+# Server Configuration
 PORT=3000
 NODE_ENV=development
+
+# Data File Paths
 QURAN_DATA_PATH=./data/quran.json
 INDEX_DATA_PATH=./data/index.json
+
+# API Configuration
 MAX_SEARCH_RESULTS=1000
 CACHE_TTL=3600
+
+# Performance
+REQUEST_TIMEOUT=30000
+BODY_LIMIT=10mb
+
+# Development
+DEBUG_MODE=false
+ENABLE_MORGAN_LOGGING=true
 ```
 
 ## Performance
 
 - **With Index**: Searches are extremely fast (milliseconds)
 - **Without Index**: Searches scan the entire Quran (slower but still functional)
-- **Batch Search**: Processes multiple words in parallel
+- **Word Variations**: Automatically searches for both forms (with/without ال prefix)
 
 ## Arabic Text Normalization
 
 The API automatically normalizes Arabic text by:
 - Removing diacritics (تشكيل)
-- Standardizing character variations (أ, إ, آ → ا)
+- Standardizing character variations (أ, إ, آ, ٱ → ا)
 - Converting تاء مربوطة to هاء
-- Removing extra spaces
+- Converting ياء to ي
+- Converting hamza variations (ؤ, ئ → و)
+- Removing extra spaces and tatweel (ـ)
 
-## Error Handling
+## Current API Status
 
-The API provides comprehensive error handling:
-- Input validation errors (400)
-- Resource not found (404)
-- Server errors (500)
-- Detailed error messages with timestamps
+The API currently provides **one endpoint**:
+- `GET /api/search?word=<arabic_word>` - Search for Arabic words in the Quran
 
-## License
-
-ISC
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
