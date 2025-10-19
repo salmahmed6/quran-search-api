@@ -27,7 +27,7 @@ app.use(errorHandler);
 
 // Start server
 app.listen(config.PORT, () => {
-  console.log(` Quran Search API listening on http://localhost:${config.PORT}`);
+  console.log(` Quran Search API listening on http://localhost:${config.PORT}`);   
   console.log(`Search endpoint: http://localhost:${config.PORT}/api/search?word=<arabic_word>`);
 });
 
